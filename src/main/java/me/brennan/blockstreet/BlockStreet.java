@@ -23,7 +23,6 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.sql.Connection;
@@ -36,6 +35,8 @@ import java.sql.Connection;
  **/
 public class BlockStreet extends JavaPlugin {
     public static BlockStreet INSTANCE;
+
+    public final String VERSION = "1.0.0";
 
     private FileConfiguration config;
 

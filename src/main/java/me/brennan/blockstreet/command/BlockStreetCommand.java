@@ -30,7 +30,7 @@ public class BlockStreetCommand implements CommandExecutor {
                 return false;
             }
 
-            Logger.sendMessage(player, ChatColor.GREEN, String.format("%s%s %s- %s", ChatColor.GOLD, "BlockStreet", ChatColor.GRAY, blockStreet.getServer().getVersion()));
+            Logger.sendMessage(player, ChatColor.GREEN, String.format("%s%s %s- %s", ChatColor.GOLD, "BlockStreet", ChatColor.GRAY, blockStreet.VERSION));
             Logger.sendMessage(player, ChatColor.GREEN, String.format("%s%s %s- %s", ChatColor.GOLD, "Amount of Companies", ChatColor.GRAY, blockStreet.getCompanyManager().getCompanies().size()));
             Logger.sendMessage(player, ChatColor.GREEN, String.format("%s%s %s- %s", ChatColor.GOLD, "Amount of Stocks", ChatColor.GRAY, blockStreet.getStockManager().getStocks().size()));
             return true;
