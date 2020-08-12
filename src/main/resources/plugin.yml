@@ -1,0 +1,13 @@
+name: BlockStreet
+author: Brennan
+version: 1.0
+depend: [Vault]
+main: me.brennan.blockstreet.BlockStreet
+
+commands:
+  company:
+    description: the base company command.
+  stock:
+    description: the base stock command.
+  blockstreet:
+    description: displays info about BlockStreet.
