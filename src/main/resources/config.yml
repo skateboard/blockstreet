@@ -1,6 +1,11 @@
 
 use-localdb: true
 
+##Time in ticks between each payday (84000 is 7 mc days or 1 week)
+timeInBetween: 84000
+
+shop-creation-cost: 250
+
 database:
   host: 127.0.0.1
   port: 3306

@@ -1,110 +1,52 @@
 package me.brennan.blockstreet;
 
-import me.brennan.blockstreet.command.BlockStreetCommand;
-import me.brennan.blockstreet.command.CompanyCommand;
-import me.brennan.blockstreet.command.EmploymentCommand;
-import me.brennan.blockstreet.command.StockCommand;
-import me.brennan.blockstreet.company.Company;
-import me.brennan.blockstreet.company.CompanyManager;
-import me.brennan.blockstreet.company.CompanySystem;
-import me.brennan.blockstreet.employment.EmploymentManager;
-import me.brennan.blockstreet.employment.EmploymentSystem;
-import me.brennan.blockstreet.gui.GUIManager;
-import me.brennan.blockstreet.listeners.PlayerListener;
-import me.brennan.blockstreet.stock.StockManager;
-import me.brennan.blockstreet.transaction.TransactionManager;
-import me.brennan.blockstreet.stock.StockSystem;
+import me.brennan.blockstreet.command.CommandManager;
+import me.brennan.blockstreet.company.AbstractCompanyManager;
+import me.brennan.blockstreet.player.AbstractPlayerManager;
+import me.brennan.blockstreet.stock.AbstractStockManager;
 import me.brennan.blockstreet.util.Logger;
-import me.brennan.blockstreet.util.MySQL;
+import me.brennan.blockstreetapi.StocksPlugin;
+import me.brennan.blockstreetapi.company.CompanyManager;
+import me.brennan.blockstreetapi.player.PlayerManager;
+import me.brennan.blockstreetapi.stock.StockManager;
 import net.milkbowl.vault.economy.Economy;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.ChatColor;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
-
-import java.io.File;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.sql.Connection;
 
 /**
  * made for BlockStreet
  *
  * @author Brennan
- * @since 8/7/2020
+ * @since 8/15/2020
  **/
-public class BlockStreet extends JavaPlugin {
-    public static BlockStreet INSTANCE;
+public class BlockStreet extends JavaPlugin implements StocksPlugin {
+    private static BlockStreet INSTANCE;
 
-    public final String VERSION = "1.0.0";
+    public static final String VERSION = "1.1";
 
-    private FileConfiguration config;
+    private boolean marketStatus;
 
-    private Connection connection;
+    private final StockManager stockManager = new AbstractStockManager();
+    private final CompanyManager companyManager = new AbstractCompanyManager();
+    private final PlayerManager playerManager = new AbstractPlayerManager();
+
+    private final CommandManager commandManager = new CommandManager();
 
     private Economy economy = null;
-
-    private StockManager stockManager;
-    private StockSystem stockSystem;
-
-    private TransactionManager transactionManager;
-
-    private CompanyManager companyManager;
-    private CompanySystem companySystem;
-
-    private EmploymentManager employmentManager;
-    private EmploymentSystem employmentSystem;
-
-    private GUIManager guiManager;
 
     @Override
     public void onEnable() {
         super.onEnable();
-        if (!setupEconomy() ) {
-            System.out.println(String.format("[%s] - Disabled because Vault was not found!", "BlockStreet"));
+        if(!setupEconomy()) {
+            Logger.printConsole(ChatColor.RED, "Vault was not! Disabling BlockStreet");
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
-
         INSTANCE = this;
-        final File configFile = new File(this.getDataFolder(), "config.yml");
-        this.config = new YamlConfiguration();
 
-        if (!configFile.exists()) {
-            try {
-                InputStream stream = getResource("config.yml");
-                Files.copy(stream, configFile.toPath());
+        commandManager.load();
 
-                config.load(configFile);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        if(!MySQL.createDatabase()) {
-            Logger.printConsole("Cannot load database!");
-        }
-        connection = MySQL.getConnection();
-
-        stockSystem = new StockSystem();
-        stockManager = new StockManager(this);
-        stockSystem.loadStocks();
-
-        transactionManager = new TransactionManager();
-        transactionManager.loadTransactions();
-
-        companySystem = new CompanySystem();
-        companyManager = new CompanyManager();
-        companySystem.loadCompanies();
-
-        employmentManager = new EmploymentManager();
-        employmentSystem = new EmploymentSystem();
-
-        guiManager = new GUIManager(this);
-
-        registerCommands();
-
-        getServer().getPluginManager().registerEvents(new PlayerListener(), this);
     }
 
     @Override
@@ -112,11 +54,52 @@ public class BlockStreet extends JavaPlugin {
         super.onDisable();
     }
 
-    private void registerCommands() {
-        getCommand("stock").setExecutor(new StockCommand(this));
-        getCommand("company").setExecutor(new CompanyCommand(this));
-        getCommand("blockstreet").setExecutor(new BlockStreetCommand(this));
-        getCommand("employment").setExecutor(new EmploymentCommand(this));
+    public static BlockStreet getINSTANCE() {
+        return INSTANCE;
+    }
+
+    public Economy getEconomy() {
+        return economy;
+    }
+
+    @Override
+    public PlayerManager getPlayerManager() {
+        return playerManager;
+    }
+
+    @Override
+    public StockManager getStockManager() {
+        return stockManager;
+    }
+
+    @Override
+    public CompanyManager getCompanyManager() {
+        return companyManager;
+    }
+
+    @Override
+    public String[] getPopularStocks() {
+        return new String[0];
+    }
+
+    @Override
+    public void setMarketStatus(boolean status) {
+        this.marketStatus = status;
+    }
+
+    @Override
+    public boolean isMarketClosed() {
+        return marketStatus;
+    }
+
+    @Override
+    public double getTax() {
+        return 0;
+    }
+
+    @Override
+    public double getMaxTrade() {
+        return 0;
     }
 
     private boolean setupEconomy() {
@@ -131,45 +114,5 @@ public class BlockStreet extends JavaPlugin {
         this.economy = rsp.getProvider();
 
         return economy != null;
-    }
-
-    public EmploymentManager getEmploymentManager() {
-        return employmentManager;
-    }
-
-    public EmploymentSystem getEmploymentSystem() {
-        return employmentSystem;
-    }
-
-    public GUIManager getGuiManager() {
-        return guiManager;
-    }
-
-    public Connection getConnection() {
-        return connection;
-    }
-
-    public StockSystem getStockSystem() {
-        return stockSystem;
-    }
-
-    public CompanyManager getCompanyManager() {
-        return companyManager;
-    }
-
-    public CompanySystem getCompanySystem() {
-        return companySystem;
-    }
-
-    public TransactionManager getTransactionManager() {
-        return transactionManager;
-    }
-
-    public StockManager getStockManager() {
-        return stockManager;
-    }
-
-    public Economy getEconomy() {
-        return economy;
     }
 }

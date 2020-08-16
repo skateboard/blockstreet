@@ -1,3 +1,4 @@
+
 plugins {
     id 'java'
     id 'com.github.johnrengelman.shadow' version '5.2.0'
@@ -15,7 +16,10 @@ repositories {
         name 'JitPack'
         url 'https://jitpack.io'
     }
-
+    maven {
+        name 'Aikar'
+        url 'https://repo.aikar.co/content/groups/aikar/'
+    }
     maven {
         name 'Spigot-MC'
         url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
@@ -31,6 +35,10 @@ dependencies {
     compile "com.github.MilkBowl:VaultAPI:1.7"
 
     compile 'com.google.code.gson:gson:+'
+
+    compile('co.aikar:acf-paper:+')
+
+    implementation files('libs//api.jar')
 }
 
 jar {
